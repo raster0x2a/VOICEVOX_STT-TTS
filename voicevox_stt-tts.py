@@ -4,6 +4,7 @@ import sys
 import datetime
 import time
 import wave
+from sasawrapper import output_to_wav
 from six.moves import queue
 import hashlib
 
@@ -16,6 +17,7 @@ from credentials import voicevox_api_key, google_tts_crediential_file_name
 
 # Google Text-to-Speech Searviceの認証情報JSONファイルのパスを環境変数に設定
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), google_tts_crediential_file_name)
+OUTPUT_DEVICE_INDEX = 7  # 任意の出力デバイスを指定
 
 
 def speak(text):
@@ -31,14 +33,13 @@ def speak(text):
         wf = wave.open(file_path, "r")
 
         p = pyaudio.PyAudio()
-        p. get_device_info_by_index(2)  # 任意の入力デバイスを指定
         
         stream = p.open(
             format=p.get_format_from_width(wf.getsampwidth()),
             channels=wf.getnchannels(),
             rate=wf.getframerate(),
             frames_per_buffer=1024,
-            output_device_index=7,  # 任意の出力デバイスを指定
+            output_device_index=OUTPUT_DEVICE_INDEX,
             output=True
         )
 
