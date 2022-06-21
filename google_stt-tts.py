@@ -3,55 +3,16 @@ import re
 import sys
 import datetime
 import time
-import wave
-from sasawrapper import output_to_wav
 from six.moves import queue
-import hashlib
 
 from google.cloud import speech
 import pyaudio
-import requests
 
-from credentials import voicevox_api_key, google_tts_crediential_file_name
-
+from credentials import google_tts_crediential_file_name
+from voicevox_speak import speak
 
 # Google Text-to-Speech Searviceの認証情報JSONファイルのパスを環境変数に設定
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), google_tts_crediential_file_name)
-OUTPUT_DEVICE_INDEX = 7  # 任意の出力デバイスを指定
-
-
-def speak(text):
-    try:
-        response = requests.get(f"https://api.su-shiki.com/v2/voicevox/audio/?key={voicevox_api_key}&text={text}")
-        # 末尾に読み上げテキストのハッシュを付したファイル名
-        filename = f"audio_{hashlib.md5(text.encode('utf-8')).hexdigest()}.wav"
-        file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "audio", filename)
-        if not os.path.isfile(file_path):
-            with open(file_path, 'wb') as save_file:
-                save_file.write(response.content)
-        
-        wf = wave.open(file_path, "r")
-
-        p = pyaudio.PyAudio()
-        
-        stream = p.open(
-            format=p.get_format_from_width(wf.getsampwidth()),
-            channels=wf.getnchannels(),
-            rate=wf.getframerate(),
-            frames_per_buffer=1024,
-            output_device_index=OUTPUT_DEVICE_INDEX,
-            output=True
-        )
-
-        chunk = 1024
-        data = wf.readframes(chunk)
-        while data != b"":
-            stream.write(data)
-            data = wf.readframes(chunk)
-        stream.close()
-
-    except Exception as e:
-        print(e)
 
 
 RATE = 16000
